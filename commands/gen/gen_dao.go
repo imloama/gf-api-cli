@@ -2,7 +2,6 @@ package gen
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"github.com/gogf/gf-cli/library/mlog"
 	"github.com/gogf/gf-cli/library/utils"
@@ -216,7 +215,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser) {
 	if tablesStr != "" {
 		tableNames = gstr.SplitAndTrim(tablesStr, ",")
 	} else {
-		tableNames, err = db.Tables(context.TODO())
+		tableNames, err = db.Tables(db.GetCtx())
 		if err != nil {
 			mlog.Fatalf("fetching tables failed: \n %v", err)
 		}
@@ -246,7 +245,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser) {
 
 // generateDaoAndModelContentFile generates the dao and model content of given table.
 func generateDaoAndModelContentFile(db gdb.DB, req *generateDaoReq) {
-	fieldMap, err := db.TableFields(context.TODO(), req.TableName)
+	fieldMap, err := db.TableFields(db.GetCtx(),req.TableName)
 	if err != nil {
 		mlog.Fatalf("fetching tables fields failed for table '%s':\n%v", req.TableName, err)
 	}

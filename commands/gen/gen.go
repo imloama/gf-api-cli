@@ -14,12 +14,6 @@ func Help() {
 	case "model":
 		HelpModel()
 
-	case "pb":
-		HelpPb()
-
-	case "pbentity":
-		HelpPbEntity()
-
 	default:
 		mlog.Print(gstr.TrimLeft(`
 USAGE 
@@ -29,8 +23,6 @@ TYPE
     dao        generate dao and model files.
     model      generate model files, note that these generated model files are different from model files 
                of command "gf gen dao".
-    pb         parse proto files and generate protobuf go files.
-    pbentity   generate entity message files in protobuf3 format.
 
 DESCRIPTION
     The "gen" command is designed for multiple generating purposes. 
@@ -53,10 +45,5 @@ func Run() {
 	case "model":
 		doGenModel()
 
-	case "pb":
-		doGenPb()
-
-	case "pbentity":
-		doGenPbEntity()
 	}
 }
