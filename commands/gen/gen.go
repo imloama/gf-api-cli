@@ -8,18 +8,19 @@ import (
 
 func Help() {
 	switch gcmd.GetArg(2) {
+	case "api":
+		HelpApi()
 	case "dao":
 		HelpDao()
-
 	case "model":
 		HelpModel()
-
 	default:
 		mlog.Print(gstr.TrimLeft(`
 USAGE 
-    gf gen TYPE [OPTION]
+    gali gen TYPE [OPTION]
 
 TYPE
+    api        generate api dao and model files
     dao        generate dao and model files.
     model      generate model files, note that these generated model files are different from model files 
                of command "gf gen dao".
@@ -39,9 +40,10 @@ func Run() {
 		return
 	}
 	switch genType {
+	case "api":
+		doGenApi()
 	case "dao":
 		doGenDao()
-
 	case "model":
 		doGenModel()
 

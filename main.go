@@ -40,7 +40,7 @@ ADDITIONAL
     in the tail of their comments.
 `)
 )
-func main()  {
+func main() {
 	allyes.Init()
 	command := gcmd.GetArg(1)
 	// Help information
