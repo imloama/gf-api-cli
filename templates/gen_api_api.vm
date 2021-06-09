@@ -1,0 +1,155 @@
+package api
+
+import (
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/net/ghttp"
+	"github.com/imloama/gf-base-api"
+	"{TplImportPrefix}/service"
+)
+
+type a{{.TplTableNameCamelCase}}Api struct {
+}
+
+var {{.TplTableNameCamelCase}}Api = new(a{{.TplTableNameCamelCase}}Api)
+
+// @summary 根据ID查询
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}} [GET]
+// @Param id query int true "主键"
+// @success 200 {object} baseapi.APIResult{data=service.} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)GetById(r *ghttp.Request){
+	id := r.GetInt64("id")
+	if id<=0{
+		baseapi.Fail(r, "缺少参数：id", "{{.TplTableNameCamelCase}}001")
+		return
+	}
+	data, err := service.{{.TplTableNameCamelCase}}Service.GetById(r, id)
+	if err!=nil{
+		baseapi.Fail(r, "服务器发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}002")
+		return
+	}
+	baseapi.OK(r, data)
+}
+
+// @summary 新增
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}} [POST]
+// @Param data body service.{{.TplTableNameCamelCase}}AddRequest true "请求参数"
+// @success 200 {object} baseapi.APIResult{data=bool} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)Add(r *ghttp.Request) {
+	var req *service.{{.TplTableNameCamelCase}}AddRequest
+	if err := r.ParseForm(&req); err != nil {
+		baseapi.JsonExit(r, 400, "请求参数不正确！"+err.Error(), "{{.TplTableNameCamelCase}}010", nil)
+		return
+	}
+	err := service.{{.TplTableNameCamelCase}}Service.Insert(r, req)
+	if err!=nil{
+		baseapi.Fail(r, "新增发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}011")
+		return
+	}
+	baseapi.OK(r, true)
+}
+// @summary 修改
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}}/{id} [POST]
+// @param id path int true "id"
+// @param data body service.{{.TplTableNameCamelCase}}UpdateRequest true "请求参数"
+// @success 200 {object} baseapi.APIResult{data=service.{{.TplTableNameCamelCase}}Response} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)Update(r *ghttp.Request) {
+	id := r.GetInt64("id")
+	if id<=0{
+		baseapi.JsonExit(r, 400, "缺少参数：id！", "{{.TplTableNameCamelCase}}020", nil)
+		return
+	}
+	var req *service.{{.TplTableNameCamelCase}}UpdateRequest
+	if err := r.ParseForm(&req); err != nil {
+		baseapi.JsonExit(r, 400, "请求参数不正确！"+err.Error(), "{{.TplTableNameCamelCase}}021", nil)
+		return
+	}
+	result, err := service.{{.TplTableNameCamelCase}}Service.Modify(r, id, req)
+	if err!=nil{
+		baseapi.Fail(r, "修改发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}022")
+		return
+	}
+	baseapi.OK(r, result)
+}
+
+// @summary 删除
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}}/{id} [DELETE]
+// @param id path int true "id"
+// @success 200 {object} baseapi.APIResult{data=bool} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)DeleteById(r *ghttp.Request) {
+	id := r.GetInt64("id")
+	if id<=0{
+		baseapi.JsonExit(r, 400, "缺少参数：id！", "{{.TplTableNameCamelCase}}030", nil)
+		return
+	}
+
+	err := service.{{.TplTableNameCamelCase}}Service.DeleteById(r, id)
+	if err!=nil{
+		baseapi.Fail(r, "删除发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}031")
+		return
+	}
+	baseapi.OK(r, true)
+}
+
+// @summary 分页查询
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}}/page [POST]
+// @param data body service.{{.TplTableNameCamelCase}}PageRequst true "请求参数"
+// @success 200 {object} baseapi.APIResult{data=service.{{.TplTableNameCamelCase}}PageResponse} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)Page(r *ghttp.Request) {
+	var req *service.{{.TplTableNameCamelCase}}PageRequst
+	if err := r.ParseForm(&req); err != nil {
+		baseapi.JsonExit(r, 400, "请求参数不正确！"+err.Error(), "{{.TplTableNameCamelCase}}040", nil)
+		return
+	}
+	result, err := service.{{.TplTableNameCamelCase}}Service.Page(r, req)
+	if err!=nil{
+		baseapi.Fail(r, "分布查询发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}041")
+		return
+	}
+	baseapi.OK(r, result)
+}
+
+// @summary 列表查询
+// @tags {{.TplTableNameCamelCase}}
+// @produce json
+// @router  /api/v1/{{.TplTableName}}/list [POST]
+// @param data body service.{{.TplTableNameCamelCase}}QueryRequest true "请求参数"
+// @success 200 {object} baseapi.APIResult{data=[]service.{{.TplTableNameCamelCase}}Response} "ok"
+func(api *a{{.TplTableNameCamelCase}}Api)List(r *ghttp.Request) {
+	var req *service.{{.TplTableNameCamelCase}}QueryRequest
+	if err := r.ParseForm(&req); err != nil {
+		baseapi.JsonExit(r, 400, "请求参数不正确！"+err.Error(), "{{.TplTableNameCamelCase}}040", nil)
+		return
+	}
+	result, err := service.{{.TplTableNameCamelCase}}Service.List(r, req)
+	if err!=nil{
+		baseapi.Fail(r, "分布查询发生错误！"+err.Error(), "{{.TplTableNameCamelCase}}041")
+		return
+	}
+	baseapi.OK(r, result)
+}
+
+func init(){
+	s := g.Server()
+	s.Use(baseapi.MiddlewareCORS)
+	s.Use(baseapi.MiddlewareLog)
+	s.Group("/api/v1/{{.TplTableName}}", func(group *ghttp.RouterGroup) {
+		//TODO 授权的问题！
+
+		group.GET("", {{.TplTableNameCamelCase}}Api.GetById)
+		group.POST("", {{.TplTableNameCamelCase}}Api.Add)
+		group.POST("/:id", {{.TplTableNameCamelCase}}Api.Update)
+		group.DELETE("/:id", {{.TplTableNameCamelCase}}Api.DeleteById)
+		group.POST("/page", {{.TplTableNameCamelCase}}Api.Page)
+		group.POST("/list", {{.TplTableNameCamelCase}}Api.List)
+	})
+}

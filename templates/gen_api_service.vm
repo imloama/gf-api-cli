@@ -1,0 +1,153 @@
+package service
+
+import (
+	"errors"
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/net/ghttp"
+	"github.com/gogf/gf/os/gtime"
+	"{TplImportPrefix}/dao"
+)
+
+type i{{.TplTableNameCamelCase}}Service struct{}
+var {{.TplTableNameCamelCase}} = new(i{{.TplTableNameCamelCase}})
+
+type {{.TplTableNameCamelCase}}PageRequst struct {
+	PageNumber int         `json:"page_number"` // 页码
+	PageSize   int         `json:"page_size"`   // 每页记录数
+	{{.TplTableNameCamelCase}}QueryRequest
+}
+
+type {{.TplTableNameCamelCase}}QueryRequest struct {
+    {TplColumnDefine}
+}
+
+// 新增请求参数
+type {{.TplTableNameCamelCase}}AddRequest struct {
+    {TplColumnDefine}
+}
+
+// 更新请求参数
+type {{.TplTableNameCamelCase}}UpdateRequest struct{
+    {TplColumnDefine}
+}
+
+//  {{.TplTableNameCamelCase}}分页查询返回结果
+type {{.TplTableNameCamelCase}}PageResponse struct {
+	PageNumber int                   `json:"page_number"` // 页码
+	PageSize   int                   `json:"page_size"`   // 每页记录数
+	Total      int                   `json:"total"`       // 总记录数
+	Pages      int                   `json:"pages"`       // 多少页
+	Data       []*{{.TplTableNameCamelCase}}Response `json:"data"`        // 查询结果
+}
+
+type {{.TplTableNameCamelCase}}Response struct {
+
+}
+
+// 新增
+func(svr *i{{.TplTableNameCamelCase}}Service)Insert(r *ghttp.Request,data *{{.TplTableNameCamelCase}}AddRequest)error{
+	result := g.Map{
+		//"code": data.Code,
+		//"name": data.Name,
+		"created_at": gtime.Now(),
+		"updated_at": gtime.Now(),
+	}
+	res, err := dao.{{.TplTableNameCamelCase}}.Insert(result)
+	if err!=nil{
+		g.Log().Errorf("保存失败！%v", err)
+		return err
+	}
+	if i,_:=res.RowsAffected();i<=0{
+		return errors.New("新增失败！")
+	}
+	return nil
+}
+
+// 修改
+func(svr *i{{.TplTableNameCamelCase}}Service)Modify(r *ghttp.Request, id int64,data *{{.TplTableNameCamelCase}}UpdateRequest)(*{{.TplTableNameCamelCase}}Response, error){
+	//TODO 自定义内容
+	res, err := dao.{{.TplTableNameCamelCase}}.Data(data).Where("id = ?", id).Update()
+	if err!=nil{
+		g.Log().Errorf("修改失败！%v", err)
+		return nil, err
+	}
+	if i,_:=res.RowsAffected();i<=0{
+		return nil, errors.New("修改失败！")
+	}
+	var result  *{{.TplTableNameCamelCase}}Response
+	err = dao.{{.TplTableNameCamelCase}}.Where("id=?", id).Scan(result)
+	return result, err
+}
+
+// 根据id查询
+func(svr *i{{.TplTableNameCamelCase}}Service)GetById(r *ghttp.Request, id int64)(*{{.TplTableNameCamelCase}}Response, error){
+	var result  *{{.TplTableNameCamelCase}}Response
+	err := dao.{{.TplTableNameCamelCase}}.Where("id=?", id).Scan(result)
+	return result, err
+}
+
+// 根据ID删除
+func(svr *i{{.TplTableNameCamelCase}}Service)DeleteById(r *ghttp.Request,id int64)error{
+	res, err := dao.{{.TplTableNameCamelCase}}.Delete("id = ?", id)
+	if err!=nil{
+		g.Log().Errorf("根据ID失败！%v", err)
+		return err
+	}
+	if i,_:=res.RowsAffected();i<=0{
+		return errors.New("根据ID失败！")
+	}
+	return nil
+}
+
+// 分页查询
+func(svr *i{{.TplTableNameCamelCase}}Service)Page(r *ghttp.Request,req *{{.TplTableNameCamelCase}}PageRequst)(*{{.TplTableNameCamelCase}}PageResponse, error){
+	if req.PageSize <= 0 {
+		req.PageSize = 10
+	}
+	if req.PageNumber <= 0 {
+		req.PageNumber = 1
+	}
+	offset := (req.PageNumber - 1) * req.PageSize
+	//TODO 其它查询条件
+	//where := g.Map{}
+
+	totals, err := dao.{{.TplTableNameCamelCase}}.Count(req.{{.TplTableNameCamelCase}}QueryRequest)
+	if err!=nil{
+		g.Log().Errorf("连接数据库查询auth_client总数发生错误！%v", err)
+		return nil, err
+	}
+	//TODO 处理fields
+	var list []*{{.TplTableNameCamelCase}}Response
+	err = dao.{{.TplTableNameCamelCase}}.Where(req.{{.TplTableNameCamelCase}}QueryRequest).Offset(offset).Limit(req.PageSize).Scan(&list)
+	if err!=nil{
+		g.Log().Errorf("连接数据库查询auth_client分页数据发生错误！%v", err)
+		return nil, err
+	}
+	pages := 0
+	if totals >0{
+		pages = totals / req.PageSize
+		if totals % req.PageSize > 0 {
+			pages ++
+		}
+	}
+	return &{{.TplTableNameCamelCase}}PageResponse{
+		PageNumber: req.PageNumber,
+		PageSize: req.PageSize,
+		Total: totals,
+		Pages: pages,
+		Data: list,
+	}, nil
+
+}
+
+// 列表查询
+func(svr *i{{.TplTableNameCamelCase}}Service)List(r *ghttp.Request,where *{{.TplTableNameCamelCase}}QueryRequest)([]*{{.TplTableNameCamelCase}}Response, error){
+	//TODO 处理fields
+	var list []*{{.TplTableNameCamelCase}}Response
+	err := dao.{{.TplTableNameCamelCase}}.Where(where).Scan(&list)
+	if err!=nil{
+		g.Log().Errorf("连接数据库查询{{.TplTableName}}列表数据发生错误！%v", err)
+		return nil, err
+	}
+	return list, nil
+}

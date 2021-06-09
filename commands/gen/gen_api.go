@@ -2,7 +2,8 @@ package gen
 
 import (
 "bytes"
-"fmt"
+	"context"
+	"fmt"
 "github.com/gogf/gf-cli/library/mlog"
 "github.com/gogf/gf-cli/library/utils"
 "github.com/gogf/gf/database/gdb"
@@ -344,6 +345,62 @@ import (
 		"{TplColumnNames}":             gstr.Trim(generateColumnNamesForApi(fieldMap)),
 	})
 	if err := gfile.PutContents(path, strings.TrimSpace(modelContent)); err != nil {
+		mlog.Fatalf("writing content to '%s' failed: %v", path, err)
+	} else {
+		utils.GoFmt(path)
+		mlog.Print("generated:", path)
+	}
+	// service
+	view := g.View()
+	serviceTpl := string(g.Res().GetContent("templates/gen_api_service.vm"))
+	if serviceTpl==""{
+		mlog.Fatalf("获取service template失败！")
+		return
+	}
+	ctx := context.Background()
+	service, err := view.ParseContent(ctx, serviceTpl, g.Map{
+		"TplImportPrefix":            importPrefix,
+		"TplTableName":               req.TableName,
+		"TplGroupName":               req.GroupName,
+		"TplTableNameCamelCase":      tableNameCamelCase,
+		"TplTableNameCamelLowerCase": tableNameCamelLowerCase,
+		"TplStructDefine":            structDefine,
+		"TplColumnDefine":            gstr.Trim(generateColumnDefinitionForApi(fieldMap)),
+		"TplColumnNames":             gstr.Trim(generateColumnNamesForApi(fieldMap)),
+	})
+	path = gfile.Join(req.DirPath, "service", fileName+"_service.go")
+	if err!=nil{
+		mlog.Fatalf("gen service content failed: %v", err)
+		return
+	}
+	if err := gfile.PutContents(path, strings.TrimSpace(service)); err != nil {
+		mlog.Fatalf("writing content to '%s' failed: %v", path, err)
+	} else {
+		utils.GoFmt(path)
+		mlog.Print("generated:", path)
+	}
+	// api
+	apiTpl := string(g.Res().GetContent("templates/gen_api_api.vm"))
+	if apiTpl==""{
+		mlog.Fatalf("获取api template失败！")
+		return
+	}
+	apitpl, err := view.ParseContent(ctx, apiTpl, g.Map{
+		"TplImportPrefix":            importPrefix,
+		"TplTableName":               req.TableName,
+		"TplGroupName":               req.GroupName,
+		"TplTableNameCamelCase":      tableNameCamelCase,
+		"TplTableNameCamelLowerCase": tableNameCamelLowerCase,
+		"TplStructDefine":            structDefine,
+		"TplColumnDefine":            gstr.Trim(generateColumnDefinitionForApi(fieldMap)),
+		"TplColumnNames":             gstr.Trim(generateColumnNamesForApi(fieldMap)),
+	})
+	path = gfile.Join(req.DirPath, "api", fileName+"_api.go")
+	if err!=nil{
+		mlog.Fatalf("gen api content failed: %v", err)
+		return
+	}
+	if err := gfile.PutContents(path, strings.TrimSpace(apitpl)); err != nil {
 		mlog.Fatalf("writing content to '%s' failed: %v", path, err)
 	} else {
 		utils.GoFmt(path)
