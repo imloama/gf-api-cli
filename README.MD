@@ -13,3 +13,11 @@
 - api     接口文档与注释说明，方便后续维护增加
 
 
+
+
+## build
+
+`
+gf pack ./templates commands/gen/gen_api_templates.go
+go build -o gali.exe main.go
+`

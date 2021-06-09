@@ -5,11 +5,11 @@ import (
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/net/ghttp"
 	"github.com/gogf/gf/os/gtime"
-	"{TplImportPrefix}/dao"
+	"{{.TplImportPrefix}}/dao"
 )
 
 type i{{.TplTableNameCamelCase}}Service struct{}
-var {{.TplTableNameCamelCase}} = new(i{{.TplTableNameCamelCase}})
+var {{.TplTableNameCamelCase}}Service = new(i{{.TplTableNameCamelCase}}Service)
 
 type {{.TplTableNameCamelCase}}PageRequst struct {
 	PageNumber int         `json:"page_number"` // 页码
@@ -18,17 +18,17 @@ type {{.TplTableNameCamelCase}}PageRequst struct {
 }
 
 type {{.TplTableNameCamelCase}}QueryRequest struct {
-    {TplColumnDefine}
+    {{.TplColumnDefine}}
 }
 
 // 新增请求参数
 type {{.TplTableNameCamelCase}}AddRequest struct {
-    {TplColumnDefine}
+    {{.TplColumnDefine}}
 }
 
 // 更新请求参数
 type {{.TplTableNameCamelCase}}UpdateRequest struct{
-    {TplColumnDefine}
+    {{.TplColumnDefine}}
 }
 
 //  {{.TplTableNameCamelCase}}分页查询返回结果

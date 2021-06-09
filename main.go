@@ -1,4 +1,4 @@
-package gali
+package main
 
 import (
 	"github.com/gogf/gf-cli/library/allyes"
