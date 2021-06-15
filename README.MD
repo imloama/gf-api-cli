@@ -5,7 +5,7 @@
 复制[gf-cli](https://github.com/gogf/gf-cli)项目，扩展增加支持创建api接口，从而快速生成api相关接口与文档，方便后续修改
 
 
-通过`gen api`会创建的文档包括
+通过`gali gen api`会创建的文档包括
 
 - dao     基于gf-cli的`gen dao`生成
 - model   基于gf-cli的`gen dao`生成
@@ -19,5 +19,6 @@
 
 `
 gf pack ./templates commands/gen/gen_api_templates.go
+
 go build -o gali.exe main.go
 `

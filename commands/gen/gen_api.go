@@ -45,7 +45,7 @@ const (
 func HelpApi() {
 	mlog.Print(gstr.TrimLeft(`
 USAGE 
-    gf gen api [OPTION]
+    gali gen api [OPTION]
 
 OPTION
     -/--path             directory path for generated files.
@@ -75,22 +75,22 @@ CONFIGURATION SUPPORT
     Options are also supported by configuration file.
     It's suggested using configuration file instead of command line arguments making producing. 
     The configuration node name is "gf.gen.api", which also supports multiple databases, for example:
-    [gfcli]
-        [[gfcli.gen.api]]
+    [gali]
+        [[gali.gen.api]]
             link     = "mysql:root:12345678@tcp(127.0.0.1:3306)/test"
             tables   = "order,products"
             jsonCase = "CamelLower"
-        [[gfcli.gen.api]]
+        [[gali.gen.api]]
             link   = "mysql:root:12345678@tcp(127.0.0.1:3306)/primary"
             path   = "./my-app"
             prefix = "primary_"
             tables = "user, userDetail"
 
 EXAMPLES
-    gf gen api
-    gf gen api -l "mysql:root:12345678@tcp(127.0.0.1:3306)/test"
-    gf gen api -path ./model -c config.yaml -g user-center -t user,user_detail,user_login
-    gf gen api -r user_
+    gali gen api
+    gali gen api -l "mysql:root:12345678@tcp(127.0.0.1:3306)/test"
+    gali gen api -path ./model -c config.yaml -g user-center -t user,user_detail,user_login
+    gali gen api -r user_
 `))
 }
 
