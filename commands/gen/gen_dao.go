@@ -124,19 +124,19 @@ func doGenDao() {
 		}
 		if v.IsSlice() {
 			for i := 0; i < len(v.Interfaces()); i++ {
-				doGenDaoForArray(i, parser)
+				doGenDaoForArray(i, parser, nil)
 			}
 		} else {
-			doGenDaoForArray(-1, parser)
+			doGenDaoForArray(-1, parser, nil)
 		}
 	} else {
-		doGenDaoForArray(-1, parser)
+		doGenDaoForArray(-1, parser, nil)
 	}
 	mlog.Print("done!")
 }
 
 // doGenDaoForArray implements the "gen dao" command for configuration array.
-func doGenDaoForArray(index int, parser *gcmd.Parser) {
+func doGenDaoForArray(index int, parser *gcmd.Parser, f func(db gdb.DB, req generateDaoReq)) {
 	var (
 		err                error
 		db                 gdb.DB
@@ -241,7 +241,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser) {
 			newTableName = gstr.TrimLeftStr(newTableName, v, 1)
 		}
 		newTableNames[i] = newTableName
-		generateDaoContentFile(db, generateDaoReq{
+		req := generateDaoReq{
 			TableName:          tableName,
 			NewTableName:       newTableName,
 			PrefixName:         prefixName,
@@ -253,7 +253,11 @@ func doGenDaoForArray(index int, parser *gcmd.Parser) {
 			TplDaoInternalPath: tplDaoInternalPath,
 			TplModelIndexPath:  tplModelIndexPath,
 			TplModelStructPath: tplModelStructPath,
-		})
+		}
+		generateDaoContentFile(db, req)
+		if f!=nil{
+			generateApiContent(db, req)
+		}
 	}
 	generateDaoModelContentFile(db, tableNames, newTableNames, generateDaoReq{
 		JsonCase:           jsonCase,
@@ -261,6 +265,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser) {
 		TplModelIndexPath:  tplModelIndexPath,
 		TplModelStructPath: tplModelStructPath,
 	})
+
 }
 
 // generateDaoContentFile generates the dao and model content of given table.
