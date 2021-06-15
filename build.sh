@@ -1,0 +1,1 @@
+gf build -a amd64 -s linux,windows,darwin -n gali
