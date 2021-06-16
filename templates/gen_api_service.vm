@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/net/ghttp"
 	"github.com/gogf/gf/os/gtime"
 	"{{.TplImportPrefix}}/dao"
+	"{{.TplImportPrefix}}/model"
 )
 
 type i{{.TplTableNameCamelCase}}Service struct{}
@@ -150,4 +151,80 @@ func(svr *i{{.TplTableNameCamelCase}}Service)List(r *ghttp.Request,where *{{.Tpl
 		return nil, err
 	}
 	return list, nil
+}
+
+
+// 单个查询
+func(svr *i{{.TplTableNameCamelCase}}Service)One(where ...interface{})(*model.{{.TplTableNameCamelCase}}, error){
+	record, err := dao.{{.TplTableNameCamelCase}}.One(where)
+	if err!=nil{
+		return nil, err
+	}
+	return svr.Record2Model(record)
+}
+
+// 查询所有
+func(svr *i{{.TplTableNameCamelCase}}Service)All(where ...interface{})([]*model.{{.TplTableNameCamelCase}}, error){
+	result, err := dao.{{.TplTableNameCamelCase}}.All(where)
+	if err!=nil{
+		return nil, err
+	}
+	return svr.List2Models(result)
+}
+
+// 更新字段
+func(svr *i{{.TplTableNameCamelCase}}Service)Update(data interface{},where ...interface{})(int64, error){
+	result, err := dao.{{.TplTableNameCamelCase}}.Data(data).Where(where).Update()
+	if err!=nil{
+		return 0, err
+	}
+	if i, err := result.RowsAffected();err!=nil{
+		return 0,err
+	}else{
+		return i,nil
+	}
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)Exec(sql string, args ...interface{}) (int64, error) {
+	result, err := dao.{{.TplTableNameCamelCase}}.DB.Exec(sql, args)
+	if err!=nil{
+		return 0, err
+	}
+	if i, err := result.RowsAffected();err!=nil{
+		return 0,err
+	}else{
+		return i,nil
+	}
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)Query(sql string, args ...interface{}) (*sql.Rows, error) {
+	return dao.{{.TplTableNameCamelCase}}.DB.Query(sql, args)
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)ScanList(rows *sql.Rows, entity interface{}) error {
+	return rows.Scan(entity)
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)QueryAndScanList(entity interface{}, sql string, args ...interface{})error{
+	rows,err:=svr.Query(sql, args)
+	if err!=nil{
+		return err
+	}
+	return svr.ScanList(rows, entity)
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)Record2Model(record gdb.Record)(*model.{{.TplTableNameCamelCase}}, error){
+	var entity *model.{{.TplTableNameCamelCase}}
+	if err := record.Struct(&authuser); err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	return entity, nil
+}
+
+func(svr *i{{.TplTableNameCamelCase}}Service)List2Models(result gdb.Result)([]*model.{{.TplTableNameCamelCase}}, error){
+	var entities []*model.{{.TplTableNameCamelCase}}
+	if err := result.Structs(&entities); err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	return entities, nil
 }
