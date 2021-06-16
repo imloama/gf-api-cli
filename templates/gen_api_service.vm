@@ -114,14 +114,14 @@ func(svr *i{{.TplTableNameCamelCase}}Service)Page(r *ghttp.Request,req *{{.TplTa
 
 	totals, err := dao.{{.TplTableNameCamelCase}}.Count(req.{{.TplTableNameCamelCase}}QueryRequest)
 	if err!=nil{
-		g.Log().Errorf("连接数据库查询auth_client总数发生错误！%v", err)
+		g.Log().Errorf("连接数据库查询{{.TplTableName}}总数发生错误！%v", err)
 		return nil, err
 	}
 	//TODO 处理fields
 	var list []*{{.TplTableNameCamelCase}}Response
 	err = dao.{{.TplTableNameCamelCase}}.Where(req.{{.TplTableNameCamelCase}}QueryRequest).Offset(offset).Limit(req.PageSize).Scan(&list)
 	if err!=nil{
-		g.Log().Errorf("连接数据库查询auth_client分页数据发生错误！%v", err)
+		g.Log().Errorf("连接数据库查询{{.TplTableName}}分页数据发生错误！%v", err)
 		return nil, err
 	}
 	pages := 0
@@ -215,7 +215,7 @@ func(svr *i{{.TplTableNameCamelCase}}Service)QueryAndScanList(entity interface{}
 
 func(svr *i{{.TplTableNameCamelCase}}Service)Record2Model(record gdb.Record)(*model.{{.TplTableNameCamelCase}}, error){
 	var entity *model.{{.TplTableNameCamelCase}}
-	if err := record.Struct(&authuser); err != nil && err != sql.ErrNoRows {
+	if err := record.Struct(&entity); err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 	return entity, nil
