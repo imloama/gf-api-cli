@@ -201,18 +201,6 @@ func(svr *i{{.TplTableNameCamelCase}}Service)Query(sql string, args ...interface
 	return dao.{{.TplTableNameCamelCase}}.DB.Query(sql, args)
 }
 
-func(svr *i{{.TplTableNameCamelCase}}Service)ScanList(rows *sql.Rows, entity interface{}) error {
-	return rows.Scan(entity)
-}
-
-func(svr *i{{.TplTableNameCamelCase}}Service)QueryAndScanList(entity interface{}, sql string, args ...interface{})error{
-	rows,err:=svr.Query(sql, args)
-	if err!=nil{
-		return err
-	}
-	return svr.ScanList(rows, entity)
-}
-
 func(svr *i{{.TplTableNameCamelCase}}Service)Record2Model(record gdb.Record)(*model.{{.TplTableNameCamelCase}}, error){
 	var entity *model.{{.TplTableNameCamelCase}}
 	if err := record.Struct(&entity); err != nil && err != sql.ErrNoRows {
