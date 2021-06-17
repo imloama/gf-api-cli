@@ -12,22 +12,11 @@ import (
 var (
 	helpContent = gstr.TrimLeft(`
 USAGE
-    gf COMMAND [ARGUMENT] [OPTION]
+    gali COMMAND [ARGUMENT] [OPTION]
 
 COMMAND
-    env        show current Golang environment variables
-    get        install or update GF to system in default...
+
     gen        automatically generate go files for ORM models...
-    mod        extra features for go modules...
-    run        running go codes with hot-compiled-like feature...
-    init       create and initialize an empty GF project...
-    help       show more information about a specified command
-    pack       packing any file/directory to a resource file, or a go file...
-    build      cross-building go project for lots of platforms...
-    docker     create a docker image for current GF project...
-    swagger    swagger feature for current project...
-    update     update current gf binary to latest one (might need root/admin permission)
-    install    install gf binary to system (might need root/admin permission)
     version    show current binary version info
 
 OPTION
@@ -36,7 +25,7 @@ OPTION
     -v,-i      show version information
 
 ADDITIONAL
-    Use 'gf help COMMAND' or 'gf COMMAND -h' for detail about a command, which has '...' 
+    Use 'gali help COMMAND' or 'gf COMMAND -h' for detail about a command, which has '...' 
     in the tail of their comments.
 `)
 )
@@ -82,5 +71,5 @@ func help(command string) {
 
 // version prints the version information of the cli tool.
 func version() {
-	mlog.Printf("gali version: 0.0.1")
+	mlog.Printf("gali version: 0.0.2")
 }
