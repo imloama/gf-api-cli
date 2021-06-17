@@ -23,6 +23,6 @@ gf pack ./templates commands/gen/gen_api_templates.go
 go build -o gali.exe main.go
 
 
-gf build main.go -a amd64 -s linux,windows,darwin -n gali
+gf build main.go -a amd64 -s linux,windows,darwin -n gali  -e "-ldflags \"-s -w\""
 
 `
