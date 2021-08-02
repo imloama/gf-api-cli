@@ -204,7 +204,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser, f func(db gdb.DB, req gene
 		if len(match) == 3 {
 			gdb.AddConfigNode(tempGroup, gdb.ConfigNode{
 				Type:     gstr.Trim(match[1]),
-				LinkInfo: gstr.Trim(match[2]),
+				Link:     gstr.Trim(match[2]),
 			})
 			db, _ = gdb.Instance(tempGroup)
 		}
