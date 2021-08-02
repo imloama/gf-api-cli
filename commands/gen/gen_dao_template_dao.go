@@ -35,6 +35,9 @@ import (
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/frame/gmvc"
     "{TplImportPrefix}/model"
+	"context"
+	"time"
+	"database/sql"
 )
 // {TplTableNameCamelCase}Dao is the manager for logic model data accessing and custom defined data operations functions management.
 type {TplTableNameCamelCase}Dao struct {
