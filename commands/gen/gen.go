@@ -12,23 +12,18 @@ func Help() {
 		HelpApi()
 	case "dao":
 		HelpDao()
-	case "model":
-		HelpModel()
 	default:
 		mlog.Print(gstr.TrimLeft(`
 USAGE 
     gali gen TYPE [OPTION]
 
 TYPE
-    api        generate api dao and model files
-    dao        generate dao and model files.
-    model      generate model files, note that these generated model files are different from model files 
-               of command "gf gen dao".
+    api        generate api service dao and model files
+    dao        generate dao and model files
 
 DESCRIPTION
-    The "gen" command is designed for multiple generating purposes. 
-    It's currently supporting generating go files for ORM models, protobuf and protobuf entity files.
-    Please use "gf gen dao -h" or "gf gen model -h" for specified type help.
+    gen api
+    gen dao
 `))
 	}
 }
@@ -44,8 +39,8 @@ func Run() {
 		doGenApi()
 	case "dao":
 		doGenDao()
-	case "model":
-		doGenModel()
+	default:
+		panic("未知命令")
 
 	}
 }

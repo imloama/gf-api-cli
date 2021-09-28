@@ -71,5 +71,5 @@ func help(command string) {
 
 // version prints the version information of the cli tool.
 func version() {
-	mlog.Printf("gali version: 1.1.0")
+	mlog.Printf("gali version: 1.2.0")
 }

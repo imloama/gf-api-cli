@@ -149,7 +149,7 @@ func doGenDaoForArray(index int, parser *gcmd.Parser, f func(db gdb.DB, req gene
 		configPath         = getOptionOrConfigForDao(index, parser, "config")                  // Config file path, eg: ./config/db.toml.
 		configGroup        = getOptionOrConfigForDao(index, parser, "group", "default")        // Group name of database configuration node for generated DAO.
 		removePrefix       = getOptionOrConfigForDao(index, parser, "removePrefix")            // Remove prefix from table name.
-		jsonCase           = getOptionOrConfigForDao(index, parser, "jsonCase", "CamelLower")  // Case configuration for 'json' tag.
+		jsonCase           = getOptionOrConfigForDao(index, parser, "jsonCase", "Snake")  // Case configuration for 'json' tag.
 		tplDaoIndexPath    = getOptionOrConfigForDao(index, parser, "tplDaoIndex")             // Template file path for generating dao index files.
 		tplDaoInternalPath = getOptionOrConfigForDao(index, parser, "tplDaoInternal")          // Template file path for generating dao internal files.
 		tplModelIndexPath  = getOptionOrConfigForDao(index, parser, "tplModelIndex")           // Template file path for generating model index files.
@@ -304,13 +304,19 @@ func generateDaoContentFile(db gdb.DB, req generateDaoReq) {
 	}
 
 	// dao - index
-	generateDaoIndex(tableNameCamelCase, tableNameCamelLowerCase, importPrefix, dirPathDao, fileName, req)
+	//generateDaoIndex(tableNameCamelCase, tableNameCamelLowerCase, importPrefix, dirPathDao, fileName, req)
 
 	// dao - internal
-	generateDaoInternal(tableNameCamelCase, tableNameCamelLowerCase, importPrefix, dirPathDao, fileName, fieldMap, req)
+	generateDaoFile(tableNameCamelCase, tableNameCamelLowerCase, importPrefix, dirPathDao, fileName, fieldMap, req)
 }
 
 func generateDaoModelContentFile(db gdb.DB, tableNames, newTableNames []string, req generateDaoReq) {
+	view := g.View()
+	modelTpl := string(g.Res().GetContent("templates/gen_api_model.vm"))
+	if modelTpl == "" {
+		mlog.Fatalf("获取model template失败！")
+		return
+	}
 	var (
 		modelContent   string
 		packageImports string
@@ -323,56 +329,25 @@ func generateDaoModelContentFile(db gdb.DB, tableNames, newTableNames []string, 
 		if err != nil {
 			mlog.Fatalf("fetching tables fields failed for table '%s':\n%v", req.TableName, err)
 		}
-		modelContent += generateDaoModelStructContent(
-			tableName,
-			gstr.CaseCamel(newTableNames[i]),
-			req.TplModelStructPath,
-			generateStructDefinitionForModel(gstr.CaseCamel(newTableNames[i]), fieldMap, req),
-		)
-		modelContent += "\n"
-	}
-	// Time package recognition.
-	if strings.Contains(modelContent, "gtime.Time") {
-		packageImports = gstr.Trim(`
+
+		structDefine := generateStructDefinitionForModel(gstr.CaseCamel(newTableNames[i]), fieldMap, req)
+		if strings.Contains(structDefine, "gtime.Time") {
+			packageImports = gstr.Trim(`
 import (
     "github.com/gogf/gf/os/gtime"
 )`)
-	} else {
-		packageImports = ""
-	}
-
-	// Generate and write content to golang file.
-	modelContent = gstr.ReplaceByMap(getTplModelIndexContent(req.TplModelIndexPath), g.MapStrStr{
-		"{TplPackageImports}": packageImports,
-		"{TplModelStructs}":   modelContent,
-	})
-	path := gfile.Join(dirPathModel, modelIndexFileName)
-	if err := gfile.PutContents(path, strings.TrimSpace(modelContent)); err != nil {
-		mlog.Fatalf("writing content to '%s' failed: %v", path, err)
-	} else {
-		utils.GoFmt(path)
-		mlog.Print("generated:", path)
-	}
-}
-
-func generateDaoModelStructContent(tableName, tableNameCamelCase, tplModelStructPath, structDefine string) string {
-	return gstr.ReplaceByMap(getTplModelStructContent(tplModelStructPath), g.MapStrStr{
-		"{TplTableName}":          tableName,
-		"{TplTableNameCamelCase}": tableNameCamelCase,
-		"{TplStructDefine}":       structDefine,
-	})
-}
-
-func generateDaoIndex(tableNameCamelCase, tableNameCamelLowerCase, importPrefix, dirPathDao, fileName string, req generateDaoReq) {
-	path := gfile.Join(dirPathDao, fileName+".go")
-	if !gfile.Exists(path) {
-		indexContent := gstr.ReplaceByMap(getTplDaoIndexContent(req.TplDaoIndexPath), g.MapStrStr{
-			"{TplImportPrefix}":            importPrefix,
-			"{TplTableName}":               req.TableName,
-			"{TplTableNameCamelCase}":      tableNameCamelCase,
-			"{TplTableNameCamelLowerCase}": tableNameCamelLowerCase,
+		} else {
+			packageImports = ""
+		}
+		modelContent, err := view.ParseContent(context.Background(), modelTpl, g.Map{
+			"TplTableName":              tableName,
+			"TplTableNameCamelCase":     gstr.CaseCamel(newTableNames[i]),
+			"TplStructDefine": structDefine,
+			"TplPackageImports": packageImports,
+			"TplModelStructs":   modelContent,
 		})
-		if err := gfile.PutContents(path, strings.TrimSpace(indexContent)); err != nil {
+		path := gfile.Join(dirPathModel, tableName+".go")
+		if err := gfile.PutContents(path, strings.TrimSpace(modelContent)); err != nil {
 			mlog.Fatalf("writing content to '%s' failed: %v", path, err)
 		} else {
 			utils.GoFmt(path)
@@ -381,23 +356,30 @@ func generateDaoIndex(tableNameCamelCase, tableNameCamelLowerCase, importPrefix,
 	}
 }
 
-func generateDaoInternal(
+
+func generateDaoFile(
 	tableNameCamelCase, tableNameCamelLowerCase, importPrefix string,
 	dirPathDao, fileName string,
 	fieldMap map[string]*gdb.TableField,
 	req generateDaoReq,
 ) {
-	path := gfile.Join(dirPathDao, "internal", fileName+".go")
-	modelContent := gstr.ReplaceByMap(getTplDaoInternalContent(req.TplDaoInternalPath), g.MapStrStr{
-		"{TplImportPrefix}":            importPrefix,
-		"{TplTableName}":               req.TableName,
-		"{TplGroupName}":               req.GroupName,
-		"{TplTableNameCamelCase}":      tableNameCamelCase,
-		"{TplTableNameCamelLowerCase}": tableNameCamelLowerCase,
-		"{TplColumnDefine}":            gstr.Trim(generateColumnDefinitionForDao(fieldMap)),
-		"{TplColumnNames}":             gstr.Trim(generateColumnNamesForDao(fieldMap)),
+	path := gfile.Join(dirPathDao, fileName+".go")
+	view := g.View()
+	daoTpl := string(g.Res().GetContent("templates/gen_api_dao.vm"))
+	if daoTpl == "" {
+		mlog.Fatalf("获取service template失败！")
+		return
+	}
+	daoContent, _ := view.ParseContent(context.Background(), daoTpl, g.Map{
+		"TplImportPrefix":            importPrefix,
+		"TplTableName":               req.TableName,
+		"TplGroupName":               req.GroupName,
+		"TplTableNameCamelCase":      tableNameCamelCase,
+		"TplTableNameCamelLowerCase": tableNameCamelLowerCase,
+		"TplColumnDefine":            gstr.Trim(generateColumnDefinitionForDao(fieldMap)),
+		"TplColumnNames":             gstr.Trim(generateColumnNamesForDao(fieldMap)),
 	})
-	if err := gfile.PutContents(path, strings.TrimSpace(modelContent)); err != nil {
+	if err := gfile.PutContents(path, strings.TrimSpace(daoContent)); err != nil {
 		mlog.Fatalf("writing content to '%s' failed: %v", path, err)
 	} else {
 		utils.GoFmt(path)
@@ -578,33 +560,6 @@ func generateColumnNamesForDao(fieldMap map[string]*gdb.TableField) string {
 	return buffer.String()
 }
 
-func getTplDaoIndexContent(tplDaoIndexPath string) string {
-	if tplDaoIndexPath != "" {
-		return gfile.GetContents(tplDaoIndexPath)
-	}
-	return templateDaoDaoIndexContent
-}
-
-func getTplDaoInternalContent(tplDaoInternalPath string) string {
-	if tplDaoInternalPath != "" {
-		return gfile.GetContents(tplDaoInternalPath)
-	}
-	return templateDaoDaoInternalContent
-}
-
-func getTplModelIndexContent(tplModelIndexPath string) string {
-	if tplModelIndexPath != "" {
-		return gfile.GetContents(tplModelIndexPath)
-	}
-	return templateDaoModelIndexContent
-}
-
-func getTplModelStructContent(tplModelStructPath string) string {
-	if tplModelStructPath != "" {
-		return gfile.GetContents(tplModelStructPath)
-	}
-	return templateDaoModelStructContent
-}
 
 // getJsonTagFromCase call gstr.Case* function to convert the s to specified case.
 func getJsonTagFromCase(str, caseStr string) string {
